@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -x
+
+echo "realizando carga em desenvolvimento"
+pg_dump -v -U rafael -h 10.32.10.2 selecao_uema | psql -h srv2.oservidor.com -U rafael dever_res
+
+econrio_bd_path="${HOME}/git/econrio/econrio_bd/grants"
+
+psql -h srv2.oservidor.com -U rafael -d dever_res -f ${econrio_bd_path}/1-production-econrio.sql
+psql -h srv2.oservidor.com -U rafael -d dever_res -f ${econrio_bd_path}/2-development-econrio.sql
+
+echo "terminando conexoes atuais no banco de dados"
+psql -h srv2.oservidor.com -U rafael -d postgres -c "select pg_terminate_backend(pid) from pg_stat_activity where datname='dever_uema'"
