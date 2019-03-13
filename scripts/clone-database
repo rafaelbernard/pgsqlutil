@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
+#Usage: clone-database source_db_host source_db_user source_db_name dest_db_host dest_db_user dest_db_name
 set -x
 
-echo "realizando carga em desenvolvimento"
-pg_dump -v -U rafael -h 10.32.10.2 selecao_uema | psql -h srv2.oservidor.com -U rafael dever_res
+source_db_host=$1
+source_db_user=$2
+source_db_name=$3
+dest_db_host=$4
+dest_db_user=$5
+dest_db_name=$6
 
-econrio_bd_path="${HOME}/git/econrio/econrio_bd/grants"
+echo "Starting cloning"
+pg_dump -v -U ${source_db_user} -h ${source_db_host} ${source_db_name} | psql -h ${dest_db_host} -U ${dest_db_user} ${dest_db_name}
 
-psql -h srv2.oservidor.com -U rafael -d dever_res -f ${econrio_bd_path}/1-production-econrio.sql
-psql -h srv2.oservidor.com -U rafael -d dever_res -f ${econrio_bd_path}/2-development-econrio.sql
-
-echo "terminando conexoes atuais no banco de dados"
-psql -h srv2.oservidor.com -U rafael -d postgres -c "select pg_terminate_backend(pid) from pg_stat_activity where datname='dever_uema'"
